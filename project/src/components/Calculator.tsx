@@ -1,473 +1,277 @@
-"use client";
+import React, { useState } from "react";
 
-import { useState, useEffect } from "react";
-import {
-  MapPin,
-  Clock,
-  Zap,
-  DollarSign,
-  Users,
-  Car,
-  Cloud,
-  Calendar,
-  Hash,
-  Package,
-  Truck,
-} from "lucide-react";
-import { usePricingStore } from "../lib/store";
-import { pricingModel } from "../lib/ml/pricingModel";
+export const Calculator = () => {
+  const [deliveryFactors, setDeliveryFactors] = useState({
+    orderId: "",
+    timeOfOrder: "",
+    demandLevel: "",
+    trafficCongestion: "",
+    urgencyLevel: "",
+    driverAvailability: "",
+    distanceKm: 0,
+    competitorPrice: 0,
+    weatherImpact: "",
+    specialEvent: "",
+    customerLoyalty: "",
+    stockAvailability: "",
+    expiryDays: 0,
+  });
 
-interface CalculatorProps {
-  isDark: boolean;
-}
-
-export function Calculator({ isDark }: CalculatorProps) {
-  const { deliveryFactors, setDeliveryFactors } = usePricingStore();
   const [predictedPrice, setPredictedPrice] = useState<number | null>(null);
 
-  const demandLevels = ["Low", "Medium", "High"];
-  const trafficCongestion = ["Light", "Moderate", "Heavy"];
-  const urgencyLevels = ["Flexible", "Standard", "Urgent"];
-  const driverAvailability = ["Low", "Medium", "High"];
-  const weatherImpact = ["Clear", "Rainy", "Snowy", "Stormy"];
-  const specialEvents = ["None", "Holiday", "Concert", "Festival"];
-  const customerLoyalty = ["Low", "Medium", "High"];
-  const timeOfOrder = ["Morning", "Afternoon", "Night"];
-  const stockAvailability = ["Low", "Medium", "High"];
-
-  useEffect(() => {
-    const calculatePrice = async () => {
-      const price = await pricingModel.predict(deliveryFactors);
-      setPredictedPrice(price);
+  // Mapping delivery factors to required params for the request
+  const sendToBackend = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission (page refresh)
+    
+    // Filter out empty values before sending the data
+    const requestData = {
+      Order_ID: deliveryFactors.orderId || "",
+      Time_of_Order: deliveryFactors.timeOfOrder || "",
+      Demand_Level: deliveryFactors.demandLevel || null,
+      Traffic_Congestion: deliveryFactors.trafficCongestion || null,
+      Urgency_Level: deliveryFactors.urgencyLevel || null,
+      Driver_Availability: deliveryFactors.driverAvailability || null,
+      Distance_km: deliveryFactors.distanceKm || 0,
+      Competitor_Price: deliveryFactors.competitorPrice || 0,
+      Weather_Impact: deliveryFactors.weatherImpact || null,
+      Special_Event: deliveryFactors.specialEvent || null,
+      Customer_Loyalty: deliveryFactors.customerLoyalty || null,
+      Stock_Availability: deliveryFactors.stockAvailability || null,
+      Expiry_Days: deliveryFactors.expiryDays || 0,
     };
-    calculatePrice();
-  }, [deliveryFactors]);
+  
+    try {
+      const response = await fetch("http://127.0.0.1:5000/predict_price", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+  
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Price calculated:", result);
+        setPredictedPrice(result.Predicted_Price); // Assuming the backend returns price
+      } else {
+        console.error("Error sending data to backend");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setDeliveryFactors((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
 
   return (
-    <div
-      className={`${
-        isDark ? "bg-gray-800" : "bg-white"
-      } rounded-lg shadow-lg p-6`}
-    >
-      <h2
-        className={`text-xl font-bold mb-6 flex items-center gap-2 ${
-          isDark ? "text-white" : "text-gray-900"
-        }`}
-      >
-        Delivery Price Calculator
-      </h2>
-
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Hash className="w-4 h-4" />
-                Order ID
-              </span>
-            </label>
-            <input
-              type="text"
-              value={deliveryFactors.orderId || ""}
-              onChange={(e) => setDeliveryFactors({ orderId: e.target.value })}
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-              placeholder="ORD12345"
-            />
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                Time of Order
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.timeOfOrder || timeOfOrder[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ timeOfOrder: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {timeOfOrder.map((time) => (
-                <option key={time} value={time}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Demand Level
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.demandLevel || demandLevels[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ demandLevel: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {demandLevels.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Car className="w-4 h-4" />
-                Traffic Congestion
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.trafficCongestion || trafficCongestion[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ trafficCongestion: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {trafficCongestion.map((congestion) => (
-                <option key={congestion} value={congestion}>
-                  {congestion}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Urgency Level
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.urgencyLevel || urgencyLevels[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ urgencyLevel: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {urgencyLevels.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Driver Availability
-              </span>
-            </label>
-            <select
-              value={
-                deliveryFactors.driverAvailability || driverAvailability[0]
-              }
-              onChange={(e) =>
-                setDeliveryFactors({ driverAvailability: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {driverAvailability.map((availability) => (
-                <option key={availability} value={availability}>
-                  {availability}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                Distance (km)
-              </span>
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.1"
-              value={deliveryFactors.distanceKm}
-              onChange={(e) =>
-                setDeliveryFactors({
-                  distanceKm: Number.parseFloat(e.target.value),
-                })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            />
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                Competitor Price
-              </span>
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={deliveryFactors.competitorPrice}
-              onChange={(e) =>
-                setDeliveryFactors({
-                  competitorPrice: Number.parseFloat(e.target.value),
-                })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            />
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Cloud className="w-4 h-4" />
-                Weather Impact
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.weatherImpact || weatherImpact[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ weatherImpact: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {weatherImpact.map((impact) => (
-                <option key={impact} value={impact}>
-                  {impact}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Special Event
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.specialEvent || specialEvents[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ specialEvent: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {specialEvents.map((event) => (
-                <option key={event} value={event}>
-                  {event}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Customer Loyalty
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.customerLoyalty || customerLoyalty[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ customerLoyalty: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {customerLoyalty.map((loyalty) => (
-                <option key={loyalty} value={loyalty}>
-                  {loyalty}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Package className="w-4 h-4" />
-                Stock Availability
-              </span>
-            </label>
-            <select
-              value={deliveryFactors.stockAvailability || stockAvailability[0]}
-              onChange={(e) =>
-                setDeliveryFactors({ stockAvailability: e.target.value })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            >
-              {stockAvailability.map((availability) => (
-                <option key={availability} value={availability}>
-                  {availability}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              className={`block text-sm font-medium ${
-                isDark ? "text-gray-300" : "text-gray-700"
-              } mb-1`}
-            >
-              <span className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Expiry Days
-              </span>
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={deliveryFactors.expiryDays}
-              onChange={(e) =>
-                setDeliveryFactors({
-                  expiryDays: Number.parseInt(e.target.value),
-                })
-              }
-              className={`block w-full rounded-md ${
-                isDark
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              } shadow-sm focus:ring-blue-500 focus:border-blue-500`}
-            />
-          </div>
+    <div className="max-w-4xl mx-auto p-6 bg-gray-900 text-white rounded-lg shadow-lg">
+      <h1 className="text-2xl font-bold text-center mb-6">Delivery Price Calculator</h1>
+      <form className="grid grid-cols-2 gap-4" onSubmit={sendToBackend}>
+        {/* Order ID */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium"># Order ID</label>
+          <input
+            type="text"
+            name="orderId"
+            value={deliveryFactors.orderId || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white focus:ring focus:ring-blue-400"
+          />
+        </div>
+        
+        {/* Time of Order */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">⏰ Place Order</label>
+          <input
+            type="time"
+            name="timeOfOrder"
+            value={deliveryFactors.timeOfOrder || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white focus:ring focus:ring-blue-400"
+          />
         </div>
 
-        <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        {/* Demand Level */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">👤 Demand Level</label>
+          <select
+            name="demandLevel"
+            value={deliveryFactors.demandLevel || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+
+        {/* Traffic Congestion */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">🚗 Traffic Congestion</label>
+          <select
+            name="trafficCongestion"
+            value={deliveryFactors.trafficCongestion || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>Light</option>
+            <option>Moderate</option>
+            <option>Heavy</option>
+          </select>
+        </div>
+
+        {/* Urgency Level */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">🚨 Urgency Level</label>
+          <select
+            name="urgencyLevel"
+            value={deliveryFactors.urgencyLevel || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+
+        {/* Driver Availability */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">👥 Driver Availability</label>
+          <select
+            name="driverAvailability"
+            value={deliveryFactors.driverAvailability || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+
+        {/* Distance (km) */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">📏 Distance (km)</label>
+          <input
+            type="number"
+            name="distanceKm"
+            value={deliveryFactors.distanceKm || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          />
+        </div>
+
+        {/* Competitor Price */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">💰 Competitor Price</label>
+          <input
+            type="number"
+            name="competitorPrice"
+            value={deliveryFactors.competitorPrice || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          />
+        </div>
+
+        {/* Weather Impact */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">🌦 Weather Impact</label>
+          <select
+            name="weatherImpact"
+            value={deliveryFactors.weatherImpact || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>Clear</option>
+            <option>Stormy</option>
+            <option>Rainy</option>
+            <option>Snowy</option>
+          </select>
+        </div>
+
+        {/* Special Event */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">📅 Special Event</label>
+          <select
+            name="specialEvent"
+            value={deliveryFactors.specialEvent || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>None</option>
+            <option>Sports Event</option>
+            <option>Holiday</option>
+          </select>
+        </div>
+
+        {/* Customer Loyalty */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">🏅 Customer Loyalty</label>
+          <select
+            name="customerLoyalty"
+            value={deliveryFactors.customerLoyalty || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            {[1, 2, 3, 4, 5].map((level) => (
+              <option key={level}>{level}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Stock Availability */}
+        <div className="flex flex-col">
+          <label className="text-gray-300 font-medium">📦 Stock Availability</label>
+          <select
+            name="stockAvailability"
+            value={deliveryFactors.stockAvailability || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          >
+            <option>In Stock</option>
+            <option>Out of Stock</option>
+            <option>Low Stock</option>
+          </select>
+        </div>
+
+        {/* Expiry Days */}
+        <div className="flex flex-col col-span-2">
+          <label className="text-gray-300 font-medium">📅 Expiry Days</label>
+          <input
+            type="number"
+            name="expiryDays"
+            value={deliveryFactors.expiryDays || ""}
+            onChange={handleChange}
+            className="border border-gray-700 bg-gray-800 rounded-md p-2 text-white"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="col-span-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+        >
           Calculate Price
         </button>
+      </form>
 
-        <div
-          className={`mt-6 p-4 rounded-lg ${
-            isDark ? "bg-gray-700" : "bg-gray-50"
-          }`}
-        >
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span
-                className={`text-sm font-medium ${
-                  isDark ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Predicted Price:
-              </span>
-              <span className="text-lg font-bold text-blue-600">
-                ${predictedPrice ? predictedPrice.toFixed(2) : "..."}
-              </span>
-            </div>
-          </div>
+      {/* Display Predicted Price */}
+      {predictedPrice !== null && (
+        <div className="mt-6 bg-gray-800 p-4 rounded-md text-center">
+          <h2 className="text-lg font-semibold text-gray-300">
+            Predicted Price: <span className="text-blue-400">₹{predictedPrice}</span>
+          </h2>
         </div>
-      </div>
+      )}
     </div>
   );
-}
+};
