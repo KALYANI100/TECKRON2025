@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Calculator } from './components/Calculator';
 import { PricingDashboard } from './components/PricingDashboard';
 import { AdminPanel } from './components/AdminPanel';
@@ -8,6 +8,12 @@ import { Moon, Sun } from 'lucide-react';
 function App() {
   const isAdmin = usePricingStore((state) => state.isAdmin);
   const [isDark, setIsDark] = React.useState(false);
+  const [priceData, setPriceData] = useState({
+    price: null,
+    predictedPrice: null,
+    orderId: ''
+  });
+
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -31,16 +37,16 @@ function App() {
         <div className="px-4 py-6 sm:px-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-8">
-              <PricingDashboard isDark={isDark} />
+              <PricingDashboard isDark={isDark} priceData={priceData} />
             </div>
             <div className="lg:col-span-4">
-              <Calculator isDark={isDark} />
+              <Calculator isDark={isDark} setPriceData={setPriceData} />
             </div>
           </div>
           
           {isAdmin && (
             <div className="mt-8">
-              <AdminPanel isDark={isDark} />
+              <AdminPanel />
             </div>
           )}
         </div>

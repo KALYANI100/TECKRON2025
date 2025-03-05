@@ -1,6 +1,22 @@
 import React, { useState } from "react";
+import { PricingDashboard } from "./PricingDashboard";
+// Add proper type for the props
+interface CalculatorProps {
+  setPriceData: (data: {
+    time: string;
+    price: number;
+    predicted: number;
+    orderId: string;
+  }) => void;
+}
 
-export const Calculator = () => {
+
+export const Calculator: React.FC<CalculatorProps> = () => {
+  const [priceData, setPriceData] = useState({
+    price: null,
+    predictedPrice: null,
+    orderId: ''
+  });
   const [deliveryFactors, setDeliveryFactors] = useState({
     orderId: "",
     timeOfOrder: "",
@@ -21,9 +37,8 @@ export const Calculator = () => {
 
   // Mapping delivery factors to required params for the request
   const sendToBackend = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent form submission (page refresh)
+    e.preventDefault();
     
-    // Filter out empty values before sending the data
     const requestData = {
       Order_ID: deliveryFactors.orderId || "",
       Time_of_Order: deliveryFactors.timeOfOrder || "",
@@ -52,7 +67,17 @@ export const Calculator = () => {
       if (response.ok) {
         const result = await response.json();
         console.log("Price calculated:", result);
-        setPredictedPrice(result.Predicted_Price); // Assuming the backend returns price
+        
+        // Create new data point with mock actual price for demonstration
+        const newDataPoint = {
+          time: new Date().toLocaleTimeString('en-US', { hour12: false }),
+          price: Number(result.Predicted_Price) * 0.9, // Mock actual price
+          predicted: Number(result.Predicted_Price),
+          orderId: deliveryFactors.orderId
+        };
+        console.log(newDataPoint);
+        setPriceData(newDataPoint);
+        setPredictedPrice(newDataPoint.predicted);
       } else {
         console.error("Error sending data to backend");
       }
@@ -272,6 +297,8 @@ export const Calculator = () => {
           </h2>
         </div>
       )}
+     
+  
     </div>
   );
 };
