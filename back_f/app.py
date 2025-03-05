@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
 
+# Enable CORS for all routes
+CORS(app, origins="*", methods=["GET", "POST", "OPTIONS"])
 # Load trained model and encoders
 model = joblib.load("pricing_model.pkl")
 encoders = joblib.load("encoders.pkl")
@@ -15,7 +18,7 @@ df = pd.read_csv("pricing_data.csv")
 def predict_price_api():
     try:
         data = request.json  
-
+        print(data)
         if "Order_ID" not in data:
             return jsonify({"error": "Missing parameter: Order_ID"}), 400
         

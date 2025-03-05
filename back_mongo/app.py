@@ -15,7 +15,7 @@ df = pd.read_csv("pricing_data.csv")
 def predict_price_api():
     try:
         data = request.json  
-
+        print("hi")
         if "Order_ID" not in data:
             return jsonify({"error": "Missing parameter: Order_ID"}), 400
         
