@@ -125,31 +125,31 @@ export function PricingDashboard({ isDark }: PricingDashboardProps) {
       {/* Zone Status */}
       <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg`}>
         <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Zone Status
+           Status
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ZoneCard
-            zone="Downtown"
+            zone="Event"
             status="High Demand"
             drivers="15/20"
             traffic="Congested"
-            basePrice="$10/km"
+            deliveryCharges="10/km"
             isDark={isDark}
           />
           <ZoneCard
-            zone="Suburban Area"
+            zone="Normal Day"
             status="Normal"
             drivers="12/18"
             traffic="Light"
-            basePrice="$15/km"
+            deliveryCharges="15/km"
             isDark={isDark}
           />
           <ZoneCard
-            zone="Business District"
+            zone="Sports Event"
             status="High Demand"
             drivers="25/30"
             traffic="Moderate"
-            basePrice="$12/km"
+            deliveryCharges="12/km"
             isDark={isDark}
           />
         </div>
@@ -187,11 +187,11 @@ interface ZoneCardProps {
   status: string;
   drivers: string;
   traffic: string;
-  basePrice: string;
+  deliveryCharges: string;
   isDark: boolean;
 }
 
-function ZoneCard({ zone, status, drivers, traffic, basePrice, isDark }: ZoneCardProps) {
+function ZoneCard({ zone, status, drivers, traffic, deliveryCharges, isDark }: ZoneCardProps) {
   return (
     <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-4 rounded-lg`}>
       <div className="flex justify-between items-start mb-2">
@@ -206,7 +206,7 @@ function ZoneCard({ zone, status, drivers, traffic, basePrice, isDark }: ZoneCar
       </div>
       <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Drivers: {drivers}</p>
       <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Traffic: {traffic}</p>
-      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Base Price: {basePrice}</p>
+      <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>DeliveryCharges: {deliveryCharges}</p>
     </div>
   );
 }
