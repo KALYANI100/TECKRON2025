@@ -3,12 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+ "scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview",
+  "start": "concurrently \"npm run dev\" \"python ../back_f/train.py\" \"python ../back_f/app.py\""
+}
+,
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
     "@tensorflow/tfjs": "^4.17.0",

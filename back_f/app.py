@@ -11,9 +11,10 @@ CORS(app, origins="*", methods=["GET", "POST", "OPTIONS"])
 # Load trained model and encoders
 model = joblib.load("pricing_model.pkl")
 encoders = joblib.load("encoders.pkl")
+csv_url = 'https://raw.githubusercontent.com/KALYANI100/TECKRON2025/main/pricing_data.csv'
 
-# Load dataset structure for reference
-df = pd.read_csv("./pricing_data.csv")
+# Load CSV from GitHub URL
+df = pd.read_csv(csv_url)
 
 @app.route('/predict_price', methods=['POST'])
 def predict_price_api():

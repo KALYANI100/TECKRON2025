@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "scripts": {
+    "start": "concurrently \"npm --prefix ./project run dev\" \"python ./back_f/train.py\" \"python ./back_f/app.py\""
+  }
+}

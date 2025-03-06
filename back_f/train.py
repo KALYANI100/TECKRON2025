@@ -4,8 +4,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import LabelEncoder
 
-# Load dataset
-df = pd.read_csv("./pricing_data.csv")
+csv_url = 'https://raw.githubusercontent.com/KALYANI100/TECKRON2025/main/pricing_data.csv'
+
+# Load CSV from GitHub URL
+df = pd.read_csv(csv_url)
 
 # Convert Time_of_Order (HH:MM) to total minutes since midnight
 df["Time_of_Order"] = pd.to_datetime(df["Time_of_Order"], format="%H:%M").dt.hour * 60 + pd.to_datetime(df["Time_of_Order"], format="%H:%M").dt.minute
