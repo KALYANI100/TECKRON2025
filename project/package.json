@@ -8,6 +8,7 @@
   "build": "vite build",
   "lint": "eslint .",
   "preview": "vite preview",
+   "use": "@vercel/static",
   "start": "concurrently \"npm run dev\" \"python ../back_f/train.py\" \"python ../back_f/app.py\""
 }
 ,
