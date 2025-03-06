@@ -49,7 +49,7 @@ export function PricingDashboard({ isDark }: PricingDashboardProps) {
         <StatCard
           icon={<AlertTriangle className="w-6 h-6" />}
           title="Average Price"
-          value="$35.50"
+          value="₹35.50"
           trend="+15%"
           isDark={isDark}
         />
@@ -166,7 +166,7 @@ interface StatCardProps {
   isDark: boolean;
 }
 
-function StatCard({ icon, title, value, trend, isDark }: StatCardProps) {
+function StatCard({ icon, title, value,  isDark }: StatCardProps) {
   return (
     <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg`}>
       <div className="flex items-center gap-4">
@@ -176,8 +176,7 @@ function StatCard({ icon, title, value, trend, isDark }: StatCardProps) {
         <div>
           <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{title}</p>
           <p className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}</p>
-          <p className={`text-sm ${trend.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>{trend}</p>
-        </div>
+           </div>
       </div>
     </div>
   );
